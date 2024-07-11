@@ -14,10 +14,10 @@ try{
             echo 'Error => Id "' . $_GET['id'] . '" is invalid, must be a number.';
             return;
         }
-        echo MovieController::get($_GET['id']);
+        echo json_encode(MovieController::get($_GET['id'])->serialize());
     }
     else if ($method == 'GET'){
-        echo MovieController::index();
+        echo json_encode(MovieController::index()->serialize());
     }else if ($method == 'POST'){
     
     }else if ($method == 'PUT'){

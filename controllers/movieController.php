@@ -1,28 +1,31 @@
 <?php
 
 require_once("../repositories/movieRepository.php");
+require_once("../models/SerializableArray.php");
+require_once("../DTO/ResponseDTO.php");
 
 class MovieController {
-    public static function index() {
+    public static function index(): ResponseDTO {
         try{
-            $movies = MovieRepository::getMovies();
-            $serializedMovies = [];
-            foreach ($movies as $movie) {
-                $serializedMovies[] = $movie->serialize();
+            $moviesResponse = MovieRepository::getMovies();
+            if ($moviesResponse->getStatus() == 200 && $moviesResponse->getData() != null){
+                $movies = $moviesResponse->getData();
+                $moviesSerArray = new SerializableArray($movies);
+                return new ResponseDTO(200, $moviesResponse->getMessage(), $moviesSerArray);
             }
-            return json_encode($serializedMovies);
+            return new ResponseDTO(404, "Movies not found", null);
         }catch(\Throwable $err) {
             throw $err;
         }
     }
 
-    public static function get(int $id): string {
+    public static function get(int $id): ResponseDTO {
         try{
-            $movie = MovieRepository::getMovie($id);
-            if ($movie) {
-                return json_encode($movie->serialize());
+            $movieResponse = MovieRepository::getMovie($id);
+            if ($movieResponse->getStatus() == 200 && $movieResponse->getData() != null) {
+                return new ResponseDTO(200, $movieResponse->getMessage(), $movieResponse->getData());
             }
-            return json_encode([]);
+            return new ResponseDTO(404, "Movie not found", null);
         }catch(\Throwable $err) {
             throw $err;
         }

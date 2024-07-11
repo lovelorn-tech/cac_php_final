@@ -25,8 +25,8 @@ class MovieRepository
                         $movie['author_lastname'],
                         $movie['author_dob']
                     ),
-                    $movie['thumbnail'],
-                    $movie['video'],
+                    "/public/storage/thumbnails/" . $movie['thumbnail'],
+                    "/public/storage/videos/" . $movie['video'],
                     $movie['duration'],
                     $movie['release_date']
                 ));
@@ -57,8 +57,8 @@ class MovieRepository
                         $movie['author_lastname'],
                         $movie['author_dob']
                     ),
-                    $movie['thumbnail'],
-                    $movie['video'],
+                    "/public/storage/thumbnails/" . $movie['thumbnail'],
+                    "/public/storage/videos/" . $movie['video'],
                     $movie['duration'],
                     $movie['release_date']
                 );
@@ -114,8 +114,11 @@ class MovieRepository
     {
         try {
             $con = Connection::getConnection();
-            $query = "UPDATE Movies SET deleted= ? WHERE id = ?";
-            $con->prepare($query)->execute([1, $id]);
+            $query = "UPDATE Movies SET deleted = :deleted WHERE id = :id";
+            $stmt = $con->prepare($query);
+            $stmt->bindValue('deleted', (int)1, PDO::PARAM_INT);
+            $stmt->bindValue('id', (int)$id, PDO::PARAM_INT);
+            $stmt->execute();
             return new RepositoryResponse(200, "Movie successfully deleted", null);
         } catch (\Throwable $err) {
             throw $err;

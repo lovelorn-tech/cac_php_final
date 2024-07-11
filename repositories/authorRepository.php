@@ -15,12 +15,12 @@ class AuthorRepository
             $stmt->execute([$id]);
             $author = $stmt->fetch();
             if ($author) {
-                new Author(
+                return new RepositoryResponse(200, "Author sent", new Author(
                     $author['id'],
                     $author['name'],
                     $author['lastname'],
                     $author['dob']
-                );
+                ));
             }
             return new RepositoryResponse(404, "Author not found", null);
         } catch (\Throwable $err) {
@@ -52,7 +52,8 @@ class AuthorRepository
         }
     }
 
-    public static function createAuthor(Author $author): RepositoryResponse {
+    public static function createAuthor(Author $author): RepositoryResponse
+    {
         try {
             $con = Connection::getConnection();
             $query = "INSERT INTO Authors (name, lastname, dob) VALUES (?, ?, ?)";
@@ -63,7 +64,8 @@ class AuthorRepository
         }
     }
 
-    public static function updateAuthor(Author $author): RepositoryResponse {
+    public static function updateAuthor(Author $author): RepositoryResponse
+    {
         try {
             $con = Connection::getConnection();
             $query = "UPDATE Authors SET name= ?, lastname= ?, dob= ? WHERE id = ?";
@@ -74,11 +76,15 @@ class AuthorRepository
         }
     }
 
-    public static function deleteAuthor(int $id): RepositoryResponse {
+    public static function deleteAuthor(int $id): RepositoryResponse
+    {
         try {
             $con = Connection::getConnection();
-            $query = "UPDATE Authors SET deleted= ? WHERE id = ?";
-            $con->prepare($query)->execute([1, $id]);
+            $query = "UPDATE Authors SET deleted = :deleted WHERE id = :id";
+            $stmt = $con->prepare($query);
+            $stmt->bindValue('deleted', (int)1, PDO::PARAM_INT);
+            $stmt->bindValue('id', (int)$id, PDO::PARAM_INT);
+            $stmt->execute();
             return new RepositoryResponse(200, "Author successfully deleted", null);
         } catch (\Throwable $err) {
             throw $err;
